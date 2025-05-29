@@ -1,0 +1,64 @@
+{
+  "correspondentId": "00000000-0000-0000-0000-000000000001",
+  "birthDate": {
+    "year": 1999,
+    "month": 5,
+    "day": 1
+  },
+  "familyName": "Doe",
+  "givenName": "John",
+  "citizenshipCountries": [
+    "US"
+  ],
+  "locality": "NYC",
+  "personalAddress": {
+    "locality": "US",
+    "postalCode": "76537",
+    "regionCode": "US",
+    "addressLines": [
+      "156 Bricky"
+    ],
+    "administrativeArea": "TX"
+  },
+  "employment": {
+    "employmentStatus": "EMPLOYED",
+    "employer": "Apex Fintech Solutions",
+    "occupation": "Software Engineer",
+    "postalCode": "76537",
+    "addressLines": [
+      "156 Bricky"
+    ],
+    "administrativeArea": "TX"
+  },
+  "investment_profile": {
+    "account_goals": {
+      "investment_objective": "OTHER"
+    },
+    "customer_profile": {
+      "annual_income_range_usd": "FROM_300K_TO_500K",
+      "total_net_worth_range_usd": "UNDER_25K"
+    }
+  },
+  "identityVerificationResult": {
+    "raw_vendor_data_document_id": "9488bc2d-f1a3-46a3-b31c-3a4100b58597",
+    "addressVerified": true,
+    "birthDateVerified": true,
+    "nameVerified": true,
+    "executionDate": {
+      "year": 2022,
+      "month": 4,
+      "day": 7
+    },
+    "vendor": "Adeel, Osinski and Corkery",
+    "taxIdVerified": true,
+    "externalCaseId": "12345-7894"
+  },
+  "taxIdType": "TAX_ID_TYPE_SSN",
+  "taxId": "987-65-4321",
+  "taxProfile": {
+    "federalTaxClassification": "INDIV_SOLEPROP_OR_SINGLEMEMBERLLC",
+    "irsFormType": "W_9",
+    "legalTaxRegionCode": "US",
+    "usTinStatus": "PASSING"
+  }
+}

@@ -1,0 +1,16 @@
+import { Apexascend } from "@apexfintechsolutions/ascend-sdk";
+
+// Initialize the ApexAscend SDK
+export const apexascend = new Apexascend({
+  security: {
+    apiKey: "MQmC5WVluilZt2z0mBzDLWwGJyoNkGZJfjDAr1hlig5dNiAy",
+    serviceAccountCreds: {
+      privateKey: "-----BEGIN PRIVATE KEY-----MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCfRSb/t92xZcwAq3ys3Axi4u2Cap8MI1+F4zkMqqXcJs1nsDzJ8vwOTimUjXlb+gFMinqwdtv2XAvFdBB545ncttrpbBxb+t8m1PJw0f97Mx7o3wqK01KO2IixXTGUi9gfQWttL4MzzxvzizzaCZn2OetXfv/p9XDhZkdZhMss4IQjmp+EU1Mr3gdhAPae8+ubFxqxW9ghzHDqOvRZCjIGAHuUzMmhEuvwSo9VIXv/tcgLxBEDTuHBjQ+OTkO8mjVPkY0+K8mEixLsekqSlStVs7vHrTZY2p1Nf5aeGmB8w8vMI7AeindXFat19uOmbnJS4yHHC/mUC/akhqt0NJ6NAgMBAAECggEAdS7xCbbjczFdzqRd3+Ura9phO9Js4QZpst3CzNIFpJwcBw1BPKj90RyrNTR+NTEVoZZFvO5G2tVQh9/ke3n9a8pR+OplVzuW0kBdfKrVmXS8akQowonHNXiV4kGaSBw4UI7WlogdtZHNk/w/MoFb+TEWOdMkQaQngH+7QV8WChagQAP5crLwQPLoJmDudpTieQcNNQXdO78elzXvsaECs77w+Ks1p3vU68ceaI2k7mi60FDZctCg8YAuF4CuhEAn20lZaAUFAlqfltQVp3pW/gypFLqdxyIii0PLROQChY33ITOF3ec/XF9//GgHg4qEL64dzr3sk/w+XIW46nYLtQKBgQDeS40pg2xDiqVJLsD9ahMGBT9FQCC72WDW4+kQ97x6KF0quEfvq4QAod6KaukNZmYY3z5+uHpl8X4wGJ452tluwG8nvbnvcilleYfzG4wErM+SoNdZg227WhvEl8+OWpzAz70zrJie+V1dVjudAi7jJjOqaouTu2w8rYhJ8p0pQwKBgQC3a0SJAwpEGa3gmQoF602RlyFj5rn4ZpL+U/UfZCqxOFXbgW35BOYmqLFKnrbH7f+qB3XtP/DMZMrL3DPU9Ke7YutDVJFnWxo2Pxgj1LWwdf/9i8CpIS0Zxh9mKTrkLRN5p0lZbz9AJ+mwSNsYB6aNWjxo8Upx6LIP772xPiZz7wKBgA3nRc355VSYIFxiazmuX8A5pcpsB2AYaYEnQhWImSY+zgz097La1GfBuAyKQUdQR0R4+gys9yLXJuBVOdg+guj1aj5fFHkQd9xb7I/dAjXspRLzsmRr3vof2arDH/00V6eLlrbbrbQLvrYuxY29bDdS1VpsTYyQ5WUqKWMOpJvHAoGAdfcxfwVLhv0VDYygG6p4mxieSwhLt20RQS1yS5w6sPxQi/q0ZiI2e8qnLBzj5bY2Zn6h49Lp5is1GuQnGeG4NxapxQYQ9m5rb1QpDHJz4GgkGkfVw3Eo9pir/SKrU7GCAw4KaNDZ10NUUyKods4E2oicrcnyXUyRqRpB4ErepFUCgYADzmr4EtHmQLX1fDgwYrHvphJgY51qROwzUQHzB06koh7SZ331GahdPkpBt9xfsnFww79AXqxOD3IpnITOtbUobm/MIdNnz5tswOzSo/6CM+McJ6ETWLEWdu50Jk2Ns0J5mxClO3whd2VsRpjwjUk1js4KhEuCb5x5GhgKaB9HXQ==-----END PRIVATE KEY-----",
+      name: "AdeelInternalTest",
+      organization: "firms/AFS",
+      type: "serviceAccount",
+    },
+  },
+});
+
+export default apexascend

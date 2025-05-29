@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Legal Natural Person</title>
+    <link rel="stylesheet" href="/assets/styles/main.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Legal Natural Person</h2>
+        
+        <div class="section">
+            <h3>Request Payload</h3>
+            <textarea id="requestPayload" readonly class="textarea"></textarea>
+        </div>
+
+        <button class="button primary-button" onclick="createLegalNaturalPerson()">Create Legal Natural Person</button>
+        
+        <div class="section">
+            <h3>Response</h3>
+            <textarea id="responseData" readonly class="textarea"></textarea>
+        </div>
+
+        <a href="/" class="button back-button">Back to Home</a>
+    </div>
+
+    <script>
+        // Fetch and display the payload when page loads
+        fetch('../assets/data/createLegalNaturalPerson.json')
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(data => {
+                document.getElementById('requestPayload').value = JSON.stringify(data, null, 2);
+            })
+            .catch(err => {
+                console.error('Error loading payload:', err);
+                document.getElementById('requestPayload').value = 'Error loading payload: ' + err.message;
+            });
+
+        function createLegalNaturalPerson() {
+            const responseArea = document.getElementById('responseData');
+            responseArea.value = 'Sending request...';
+
+            fetch('/legalNaturalPerson', { 
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    responseArea.value = JSON.stringify(data.data, null, 2);
+                    localStorage.setItem("legalNaturalPersonResponse", JSON.stringify(data));
+                } else {
+                    responseArea.value = 'Error: ' + JSON.stringify(data.error, null, 2);
+                }
+            })
+            .catch(err => {
+                console.error('Error creating legal natural person:', err);
+                responseArea.value = 'Error: ' + err.message;
+            });
+        }
+    </script>
+</body>
+</html>

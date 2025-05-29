@@ -1,0 +1,56 @@
+{
+    "citizenship_countries": [
+        "US"
+    ],
+    "correspondent_id": "00000000-0000-0000-0000-000000000001",
+    "birth_date": {
+        "day": 1,
+        "month": 5,
+        "year": 1999
+    },
+    "employment": {
+        "employment_status": "UNEMPLOYED" 
+        
+    },
+    "family_name": "Legit",
+    "given_name": "Stevie",
+   
+    "personal_address": {
+       
+        "region_code": "US",
+       
+        "postal_code": "10010",
+      
+        "administrative_area": "NY",
+        "locality": "NYC",
+     
+        "address_lines": [
+            "fake street 12345",
+            "123 Fake St"
+        ] 
+    },
+    "identity_verification_result": {
+        "vendor": "Adeel, Osinski and Corkery",
+        "external_case_id": "12345-7894",
+        "execution_date": {
+            "year": 2022,
+            "month": 4,
+            "day": 7
+        },
+        "name_verified": true,
+        "address_verified": true,
+        "tax_id_verified": true,
+        "birth_date_verified": true,
+        "raw_vendor_data_document_id": "Test",
+        "identity_verification_document_ids": [
+            "Test"
+        ]
+    },
+    "tax_id": "667-55-4837",
+    "tax_id_type": "TAX_ID_TYPE_SSN",
+    "tax_profile": {
+        "federal_tax_classification": "INDIV_SOLEPROP_OR_SINGLEMEMBERLLC",
+        "irs_form_type": "W_9",
+        "us_tin_status": "PASSING"
+    }
+}

@@ -1,0 +1,10 @@
+{
+  "bankAccount": {
+    "routingNumber": "517500460",
+    "accountNumber": "0836818428",
+    "owner": "Apex Relationship Account",
+    "type": "SAVINGS"
+  },
+  "nickname": "Trading account",
+  "verificationMethod": "MICRO_DEPOSIT"
+}

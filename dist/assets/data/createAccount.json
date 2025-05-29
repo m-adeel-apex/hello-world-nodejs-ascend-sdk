@@ -1,0 +1,64 @@
+{
+    "account_group_id": "00000000-0000-0000-0000-000000000002",
+    "external_account_id": "1234567899",
+    "investment_profile": {
+        "account_goals": {
+            "investment_objective": "GROWTH"
+        },
+        "customer_profile": {
+            "annual_income_range_usd": "FROM_300K_TO_500K",
+            "total_net_worth_range_usd": "UNDER_25K",
+            "liquid_net_worth_range_usd": "UNDER_25K",
+            "tax_rate": "0.35"
+        }
+    },
+    "parties": [
+        {
+            "email_address": "adeel@apexfintechsolutions.com",
+            "mailing_address": {
+                "revision": 0,
+                "region_code": "US",
+                "language_code": "en",
+                "postal_code": "75062",
+                "sorting_code": "",
+                "administrative_area": "TX",
+                "locality": "Irving",
+                "sublocality": "",
+                "address_lines": [
+                    "123 Fake St"
+                ],
+                "recipients": [],
+                "organization": ""
+            },
+            "phone_number": {
+                "e164_number": "+15128226203"
+            },
+            "relation_type": "PRIMARY_OWNER",
+            "legal_natural_person_id": "ddd7b009-0e1c-4c03-9ad0-2bbfbc1e128c",
+            "correspondent_id": "00000000-0000-0000-0000-000000000001",
+            "first_name": "John",
+            "last_name": "Doe",
+            "date_of_birth": "1990-01-01",
+            "tax_id": "123456789",
+            "tax_id_type": "SSN",
+            "country_of_citizenship": "US",
+            "country_of_tax_residence": "US"
+        }
+    ],
+    "identity_verification_result": {
+        "raw_vendor_data_document_id": "9488bc2d-f1a3-46a3-b31c-3a4100b58597",
+        "identity_verification_document_ids": []
+    },
+    "tax_profile": {
+        "cost_basis_lot_disposal_method": "COST_BASIS_LOT_DISPOSAL_FIFO",
+        "tax_lot_relief_method": "FIFO"
+    },
+    "rep_code": "REP",
+    "account_type": "INDIVIDUAL",
+    "funding_source": "BANK_ACH",
+    "account_purpose": "LONG_TERM_INVESTMENT"
+}
+
+
+
+

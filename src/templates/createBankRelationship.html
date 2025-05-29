@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Create Bank Relationship</title>
+    <link rel="stylesheet" href="/assets/styles/main.css">
+</head>
+
+<body>
+    <div class="container">
+        <h2>Create Bank Relationship</h2>
+
+        <!-- Input Section for Account ID -->
+        <div id="inputSection">
+            <label for="accountIdInput">Enter Account ID:</label>
+            <input type="text" id="accountIdInput" placeholder="Enter Account ID" class="input-field" disabled/>
+            <button id="saveAccountIdBtn" class="button primary-button">Save Account ID</button>
+        </div>
+
+        <!-- Populated Request Payload -->
+        <div class="section">
+            <h3>Request Payload</h3>
+            <textarea id="requestPayload" readonly class="textarea"></textarea>
+        </div>
+
+        <!-- Button to Create Bank Relationship -->
+        <button class="button primary-button" onclick="createBankRelationship()">Create Bank Relationship</button>
+
+        <!-- API Response Section -->
+        <div class="section">
+            <h3>Response</h3>
+            <textarea id="responseData" readonly class="textarea"></textarea>
+        </div>
+
+        <a href="/" class="button back-button">Back to Home</a>
+    </div>
+
+    <script>
+        function generateRandomString(result) {
+            const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            for (let i = 0; i < 9; i++) {
+                result += characters.charAt(Math.floor(Math.random() * characters.length));
+            }
+            populateRequestPayload(result);
+        }
+        // On page load, manage accountId functionality
+        
+
+        // Function to populate request payload with accountId
+        function populateRequestPayload(accountId, accountNumber) {
+            fetch('../assets/data/createBankRelationship.json')
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error(`HTTP error! status: ${res.status}`);
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    // Inject account ID directly into the payload
+                    data.accountId = accountId;
+                    data.accountNumber = accountNumber
+                    document.getElementById('requestPayload').value = JSON.stringify(data, null, 2);
+                })
+                .catch(err => {
+                    console.error("Error loading payload:", err);
+                    document.getElementById('requestPayload').value = "Error loading payload: " + err.message;
+                });
+        }
+
+        // Function to create a bank relationship
+        function createBankRelationship() {
+            const responseArea = document.getElementById('responseData');
+            responseArea.value = 'Sending request...';
+
+            fetch('/createBankRelationship', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: document.getElementById('requestPayload').value
+            })
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error(`HTTP error! status: ${res.status}`);
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        responseArea.value = JSON.stringify(data.data, null, 2);
+                        localStorage.setItem("createBankRelationshipResponse", JSON.stringify(data));
+                    } else {
+                        responseArea.value = 'Error: ' + JSON.stringify(data.error, null, 2);
+                    }
+                })
+                .catch(err => {
+                    console.error('Error creating bank relationship:', err);
+                    responseArea.value = 'Error: ' + err.message;
+                });
+        }
+    </script>
+</body>
+
+</html>

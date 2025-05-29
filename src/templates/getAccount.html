@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Get Account - Apex Ascend Demo</title>
+  <link rel="stylesheet" href="/assets/styles/main.css">
+</head>
+
+<body>
+  <div class="container">
+    <h2>Get Account Information</h2>
+    <form id="getAccountForm">
+      <label for="accountNumber">Account Number:</label>
+      <input type="text" id="accountNumber" name="accountNumber" required />
+      <button type="submit" class="button primary-button">Fetch Account Information</button>
+    </form>
+
+    <textarea id="accountDetails" readonly class="textarea"></textarea>
+    <a href="/" class="button back-button">Back to Home</a>
+  </div>
+
+  <script>
+    document.getElementById("getAccountForm").addEventListener("submit", async (event) => {
+      event.preventDefault(); // Prevent form submission refresh
+
+      const accountNumber = document.getElementById("accountNumber").value;
+
+      try {
+        const response = await fetch(`/getAccount/getDetails?accountId=${accountNumber}`);
+        if (!response.ok) throw new Error("Failed to fetch account information.");
+
+        const data = await response.json();
+        document.getElementById("accountDetails").value = JSON.stringify(data, null, 2);
+      } catch (error) {
+        console.error("Error fetching account information:", error);
+        document.getElementById("accountDetails").value = "Error: Unable to fetch account information.";
+      }
+    });
+  </script>
+</body>
+
+</html>

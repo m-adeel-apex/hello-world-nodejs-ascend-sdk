@@ -1,0 +1,1 @@
+{"root":["./src/app.ts","./src/index.ts","./src/server.ts","./src/routes/about.ts","./src/routes/contact.ts","./src/routes/createaccount.ts","./src/routes/getaccount.ts","./src/routes/home.ts","./src/routes/legalnaturalperson.ts","./src/types/html.d.ts","./src/utils/ascend.ts"],"version":"5.8.3"}

@@ -1,0 +1,62 @@
+{
+    "accountGroupId": "00000000-0000-0000-0000-000000000002",
+    "correspondentId": "00000000-0000-0000-0000-000000000001",
+    "external_account_id": "1234567899",
+    "investment_profile": {
+        "account_goals": {
+            "investment_objective": "GROWTH"
+        },
+        "customer_profile": {
+            "annual_income_range_usd": "FROM_300K_TO_500K",
+            "total_net_worth_range_usd": "UNDER_25K",
+            "liquid_net_worth_range_usd": "UNDER_25K",
+            "tax_rate": "0.35"
+        }
+    },
+    "parties": [
+        {
+            "emailAddress": "adeel@apexfintechsolutions.com",
+            "mailingAddress": {
+                "revision": 0,
+                "regionCode": "US",
+                "language_code": "en",
+                "postalCode": "75062",
+                "sorting_code": "",
+                "administrative_area": "TX",
+                "locality": "Irving",
+                "sublocality": "",
+                "addressLines": [
+                    "156 Bricky"
+                ],
+                "administrativeArea": "TX",
+                "recipients": [],
+                "organization": ""
+            },
+            "phoneNumber": {
+                "e164Number": "+15128226203"
+            },
+            "relationType": "PRIMARY_OWNER",
+            "legalNaturalPersonId": "ddd7b009-0e1c-4c03-9ad0-2bbfbc1e128c",
+            "correspondentId": "00000000-0000-0000-0000-000000000001",
+            "first_name": "John",
+            "last_name": "Doe",
+            "date_of_birth": "1990-01-01",
+            "tax_id": "123456789",
+            "tax_id_type": "SSN",
+            "country_of_citizenship": "US",
+            "country_of_tax_residence": "US"
+        }
+    ],
+    "identity_verification_result": {
+        "raw_vendor_data_document_id": "9488bc2d-f1a3-46a3-b31c-3a4100b58597",
+        "identity_verification_document_ids": []
+    },
+    "tax_profile": {
+        "cost_basis_lot_disposal_method": "COST_BASIS_LOT_DISPOSAL_FIFO",
+        "tax_lot_relief_method": "FIFO"
+    },
+    "rep_code": "REP",
+    "account_type": "INDIVIDUAL",
+    "funding_source": "BANK_ACH",
+    "account_purpose": "LONG_TERM_INVESTMENT"
+}
