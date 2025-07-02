@@ -1,4 +1,4 @@
-This project is designed to create and manage SDKs using Apexascend SDK integration. It includes routes, utilities, and templates to test and create relationships with bank accounts using a sample payload. The project reads from a centralized JSON file (createBankRelationship.json) and dynamically updates values as needed.
+This project is designed to create and manage Bank Relationships using Apexascend SDK integration. It includes routes, utilities, and templates to test and create relationships with bank accounts using a sample payload. The project reads from a centralized JSON file (createBankRelationship.json) and dynamically updates values as needed.
 
 Features
 API integration for bank relationships
