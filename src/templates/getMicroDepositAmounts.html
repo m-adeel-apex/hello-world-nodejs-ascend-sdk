@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Get Micro Deposit Amounts</title>
+    <link rel="stylesheet" href="/assets/styles/main.css">
+    <link rel="stylesheet" href="/assets/styles/loader.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Global Loader -->
+    <div class="loader-overlay">
+        <div class="loader"></div>
+    </div>
+
+    <div class="container">
+        <div class="header">
+            <h1>Get Micro Deposit Amounts</h1>
+            <a href="/" class="btn btn-secondary">Back to Home</a>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <form id="getMicroDepositsForm">
+                    <div class="form-group">
+                        <label for="accountId" class="form-label">Account ID:</label>
+                        <input type="text" id="accountId" class="form-control" required>
+                        <div class="form-text">This should be the ID of the account you created earlier.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bankRelationshipId" class="form-label">Bank Relationship ID:</label>
+                        <input type="text" id="bankRelationshipId" class="form-control" required>
+                        <div class="form-text">This should be the ID of the bank relationship you created earlier.</div>
+                    </div>
+
+                    <div class="button-container">
+                        <button type="submit" id="submitBtn" class="btn btn-primary">Get Micro Deposit Amounts</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="responseContainer" class="response-container" style="display: none;">
+            <h3>Response:</h3>
+            <pre id="responseArea"></pre>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('getMicroDepositsForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const accountIdInput = document.getElementById('accountId');
+            const bankRelationshipIdInput = document.getElementById('bankRelationshipId');
+            const responseContainer = document.getElementById('responseContainer');
+            const responseArea = document.getElementById('responseArea');
+            const loaderOverlay = document.querySelector('.loader-overlay');
+
+            // Function to show/hide loader
+            function toggleLoader(show) {
+                if (show) {
+                    loaderOverlay.classList.add('active');
+                    form.classList.add('loading');
+                    submitBtn.disabled = true;
+                } else {
+                    loaderOverlay.classList.remove('active');
+                    form.classList.remove('loading');
+                    submitBtn.disabled = false;
+                }
+            }
+
+            // Function to get stored IDs
+            function loadStoredIds() {
+                try {
+                    // Try to get account ID
+                    const accountData = localStorage.getItem('createAccountResponse');
+                    if (accountData) {
+                        const parsedAccountData = JSON.parse(accountData);
+                        if (parsedAccountData?.data?.account?.accountId) {
+                            accountIdInput.value = parsedAccountData.data.account.accountId;
+                        }
+                    }
+
+                    // Try to get bank relationship ID from session storage
+                    const bankData = localStorage.getItem('createBankRelationshipResponse');
+                    if (bankData) {
+                        const parsedBankData = JSON.parse(bankData);
+                        if (parsedBankData?.data?.id) {
+                            bankRelationshipIdInput.value = parsedBankData.data.id;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading stored IDs:', error);
+                }
+            }
+
+            // Load stored IDs when page loads
+            loadStoredIds();
+
+            // Handle form submission
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                // Validate inputs
+                const accountId = accountIdInput.value.trim();
+                const bankRelationshipId = bankRelationshipIdInput.value.trim();
+
+                if (!accountId) {
+                    alert('Please enter an Account ID');
+                    return;
+                }
+
+                if (!bankRelationshipId) {
+                    alert('Please enter a Bank Relationship ID');
+                    return;
+                }
+
+                // Show loader and disable form
+                toggleLoader(true);
+                
+                try {
+                    const response = await fetch('/getMicroDepositAmounts', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            accountId,
+                            bankRelationshipId
+                        })
+                    });
+
+                    const result = await response.json();
+                    
+                    // Show the response container
+                    responseContainer.style.display = 'block';
+                    
+                    if (response.ok && result.success) {
+                        responseArea.className = 'bg-light p-3 rounded';
+                        responseArea.textContent = JSON.stringify(result, null, 2);
+                        
+                        // Store the amounts in localStorage for later use
+                        if (result.data) {
+                            localStorage.setItem('microDepositAmounts', JSON.stringify(result.data));
+                        }
+                    } else {
+                        responseArea.className = 'bg-danger text-white p-3 rounded';
+                        responseArea.textContent = JSON.stringify(result, null, 2);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    responseContainer.style.display = 'block';
+                    responseArea.className = 'bg-danger text-white p-3 rounded';
+                    responseArea.textContent = 'Error processing request: ' + error.message;
+                } finally {
+                    // Hide loader and re-enable form
+                    toggleLoader(false);
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

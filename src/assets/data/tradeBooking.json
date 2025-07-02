@@ -1,0 +1,18 @@
+{
+    "brokerCapacity": "AGENCY",
+    "clientOrderId": "00be5285-0623-4560-8c58-f05af2c56ba0",
+    "executions": [
+        {
+            "executionTime": "2024-07-17T12:00:00Z",
+            "externalId": "0H06HAPA3Y",
+            "price": {
+                "value": "25.000000"
+            },
+            "quantity": {
+                "value": "1.000000"
+            }
+        }
+    ],
+    "identifier": "AAPL",
+    "sourceApplication": "Trading-App"
+}

@@ -1,29 +1,67 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>Create Account</title>
     <link rel="stylesheet" href="/assets/styles/main.css">
+    <link rel="stylesheet" href="/assets/styles/loader.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body>
+    <!-- Global Loader -->
+    <div class="loader-overlay">
+        <div class="loader"></div>
+    </div>
+
     <div class="container">
-        <h2>Create Account</h2>
-        
-        <div class="section">
-            <h3>Request Payload</h3>
-            <textarea id="requestPayload" readonly class="textarea"></textarea>
+        <div class="header">
+            <h1>Create Account</h1>
+            <a href="/" class="btn btn-secondary">Back to Home</a>
         </div>
 
-        <button class="button primary-button" onclick="createAccount()">Create Account</button>
-        
-        <div class="section">
-            <h3>Response</h3>
-            <textarea id="responseData" readonly class="textarea"></textarea>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3>Request Payload</h3>
+                <textarea id="requestPayload" readonly class="form-control mb-3"></textarea>
+                <button class="btn btn-primary" id="createAccountBtn" onclick="createAccount()">Create Account</button>
+            </div>
         </div>
 
-        <a href="/" class="button back-button">Back to Home</a>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3>Response</h3>
+                <textarea id="responseData" readonly class="form-control mb-3"></textarea>
+            </div>
+        </div>
+
+        <!-- New section for enrollment and affirmation -->
+        <div id="accountActions" class="card mb-4" style="display: none;">
+            <div class="card-body">
+                <h3>Account Actions</h3>
+                <div class="d-flex gap-2">
+                    <button id="enrollBtn" class="btn btn-success" onclick="enrollAccount()">Enroll Account</button>
+                    <button id="affirmBtn" class="btn btn-info" onclick="affirmAccount()">Affirm Account</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
+        const loaderOverlay = document.querySelector('.loader-overlay');
+        const createAccountBtn = document.getElementById('createAccountBtn');
+        const accountActions = document.getElementById('accountActions');
+
+        function toggleLoader(show) {
+            if (show) {
+                loaderOverlay.classList.add('active');
+                createAccountBtn.disabled = true;
+            } else {
+                loaderOverlay.classList.remove('active');
+                createAccountBtn.disabled = false;
+            }
+        }
+
         // Fetch and display the payload when page loads
         fetch('../assets/data/createAccount.json')
             .then(res => {
@@ -33,6 +71,26 @@
                 return res.json();
             })
             .then(data => {
+                // Get Legal Natural Person ID from localStorage
+                const legalNaturalPersonResponse = localStorage.getItem('legalNaturalPersonResponse');
+                if (legalNaturalPersonResponse) {
+                    try {
+                        const legalPersonData = JSON.parse(legalNaturalPersonResponse);
+                        const legalNaturalPersonId = legalPersonData.data.legalNaturalPerson.legalNaturalPersonId;
+                        
+                        // Update the payload with the Legal Natural Person ID
+                        if (data.parties && data.parties.length > 0) {
+                            data.parties[0].legalNaturalPersonId = legalNaturalPersonId;
+                        }
+                        
+                        console.log('Updated payload with Legal Natural Person ID:', legalNaturalPersonId);
+                    } catch (error) {
+                        console.error('Error parsing legal natural person data:', error);
+                    }
+                } else {
+                    console.log('No legal natural person data found in localStorage');
+                }
+                
                 document.getElementById('requestPayload').value = JSON.stringify(data, null, 2);
             })
             .catch(err => {
@@ -40,36 +98,128 @@
                 document.getElementById('requestPayload').value = 'Error loading payload: ' + err.message;
             });
 
-        function createAccount() {
+        async function createAccount() {
             const responseArea = document.getElementById('responseData');
-            responseArea.value = 'Sending request...';
+            responseArea.value = 'Creating account...';
+            toggleLoader(true);
 
-            fetch('/createAccount', { 
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                }
-            })
-            .then(res => {
-                if (!res.ok) {
-                    throw new Error(`HTTP error! status: ${res.status}`);
-                }
-                return res.json();
-            })
-            .then(data => {
+            try {
+                // Get the current payload from the textarea
+                const payloadText = document.getElementById('requestPayload').value;
+                const payload = JSON.parse(payloadText);
+
+                const response = await fetch('/createAccount', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
                 if (data.success) {
                     responseArea.value = JSON.stringify(data.data, null, 2);
                     localStorage.setItem("createAccountResponse", JSON.stringify(data));
+                    // Show account actions after successful creation
+                    accountActions.style.display = 'block';
                 } else {
                     responseArea.value = 'Error: ' + JSON.stringify(data.error, null, 2);
                 }
-            })
-            .catch(err => {
+            } catch (err) {
                 console.error('Error creating Account:', err);
                 responseArea.value = 'Error: ' + err.message;
-            });
+            } finally {
+                toggleLoader(false);
+            }
+        }
+
+        async function enrollAccount() {
+            const responseArea = document.getElementById('responseData');
+            try {
+                const accountData = JSON.parse(localStorage.getItem('createAccountResponse'));
+                if (!accountData?.data?.account?.accountId) {
+                    responseArea.value = 'Error: No account ID found. Please create an account first.';
+                    return;
+                }
+
+                const accountId = accountData.data.account.accountId;
+                console.log("Using Account ID for enrollment:", accountId);
+
+                toggleLoader(true);
+                responseArea.value = 'Enrolling account...';
+
+                const payload = {
+                    principalApproverId: "01JHG8NGTPWEJMQAB53HCANGEM",
+                    type: "REGISTRATION_INDIVIDUAL",
+                    consentMethod: "ESIGNATURE",
+                    accountId: accountId
+                };
+
+                console.log("Sending enrollment payload:", payload);
+
+                const response = await fetch('/enrollAccount', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    responseArea.value = 'Enrollment Response:\n\n' +
+                        'Status: Success\n' +
+                        'Account ID: ' + accountId + '\n\n' +
+                        'Full Response:\n' +
+                        JSON.stringify(result.data, null, 2);
+                    localStorage.setItem('enrollAccountResponse', JSON.stringify(result));
+                } else {
+                    responseArea.value = 'Enrollment Error:\n\n' +
+                        'Status: Failed\n' +
+                        'Account ID: ' + accountId + '\n\n' +
+                        'Error Details:\n' +
+                        JSON.stringify(result.error, null, 2);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                responseArea.value = 'Enrollment Error:\n\n' +
+                    'Status: Failed\n' +
+                    'Error Message: ' + error.message + '\n\n' +
+                    'Please check the console for more details.';
+            } finally {
+                toggleLoader(false);
+            }
+        }
+
+        async function affirmAccount() {
+            const responseArea = document.getElementById('responseData');
+            try {
+                const enrollData = JSON.parse(localStorage.getItem('enrollAccountResponse'));
+                const accountData = JSON.parse(localStorage.getItem('createAccountResponse'));
+                let accountId = accountData.data.account.accountId;
+
+                if (!accountId) {
+                    responseArea.value = 'Error: No account ID found in createAccountResponse.';
+                    return;
+                }
+
+                // Small delay to show the message, then redirect
+                setTimeout(() => {
+                    window.location.href = '/affirmSingle';
+                }, 200);
+
+            } catch (error) {
+                console.error('Error:', error);
+                responseArea.value = 'Error preparing for affirmation:\n\n' +
+                    'Error Message: ' + error.message + '\n\n' +
+                    'Please check the console for more details.';
+            }
         }
     </script>
 </body>
+
 </html>

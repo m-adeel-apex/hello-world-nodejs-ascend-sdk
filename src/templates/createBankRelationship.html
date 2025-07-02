@@ -4,101 +4,456 @@
 <head>
     <title>Create Bank Relationship</title>
     <link rel="stylesheet" href="/assets/styles/main.css">
+    <link rel="stylesheet" href="/assets/styles/loader.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
 <body>
+    <!-- Global Loader -->
+    <div class="loader-overlay">
+        <div class="loader"></div>
+    </div>
+
     <div class="container">
-        <h2>Create Bank Relationship</h2>
-
-        <!-- Input Section for Account ID -->
-        <div id="inputSection">
-            <label for="accountIdInput">Enter Account ID:</label>
-            <input type="text" id="accountIdInput" placeholder="Enter Account ID" class="input-field" disabled/>
-            <button id="saveAccountIdBtn" class="button primary-button">Save Account ID</button>
+        <div class="header">
+            <h1>Create Bank Relationship</h1>
+            <a href="/" class="btn btn-secondary">Back to Home</a>
         </div>
 
-        <!-- Populated Request Payload -->
-        <div class="section">
-            <h3>Request Payload</h3>
-            <textarea id="requestPayload" readonly class="textarea"></textarea>
+        <div class="card">
+            <div class="card-body">
+                <form id="bankRelationshipForm">
+                    <div class="form-group">
+                        <label for="accountId" class="form-label">Account ID:</label>
+                        <input type="text" id="accountId" class="form-control" required>
+                        <div class="form-text">This should be the ID of the account you created earlier.</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="requestPayload" class="form-label">Request Payload:</label>
+                        <textarea id="requestPayload" class="textarea form-control" readonly rows="8"></textarea>
+                        <div id="payloadError" class="error-message text-danger mt-2"></div>
+                    </div>
+
+                    <div class="button-container">
+                        <button type="submit" id="submitBtn" class="btn btn-primary">Create Bank Relationship</button>
+                        <button type="button" id="reloadPayloadBtn" class="btn btn-secondary">Reload Payload</button>
+                    </div>
+                </form>
+            </div>
         </div>
 
-        <!-- Button to Create Bank Relationship -->
-        <button class="button primary-button" onclick="createBankRelationship()">Create Bank Relationship</button>
+        <div id="responseContainer" class="response-container">
+            <h3>Response:</h3>
+            <pre id="responseArea"></pre>
 
-        <!-- API Response Section -->
-        <div class="section">
-            <h3>Response</h3>
-            <textarea id="responseData" readonly class="textarea"></textarea>
+            <!-- Bank Relationship Actions -->
+            <div id="bankActions" style="display: none;">
+                <h4 class="mt-3">Additional Actions</h4>
+                <div class="alert alert-info">
+                    After creating a bank relationship, you need to get and verify micro deposits.
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button class="btn btn-success" onclick="getMicroDeposits()" id="getMicroDepositsBtn">
+                        1. Get Micro Deposit Amounts
+                    </button>
+                    <button class="btn btn-success" onclick="verifyMicroDeposits()" id="verifyMicroDepositsBtn" disabled>
+                        2. Verify Micro Deposits
+                    </button>
+                </div>
+
+                <!-- Micro Deposits Response -->
+                <div id="microDepositsResponse" class="mt-3" style="display: none;">
+                    <h5>Micro Deposits Response:</h5>
+                    <pre id="microDepositsResponseData" class="bg-light p-3 rounded"></pre>
+                </div>
+
+                <!-- Verification Response -->
+                <div id="verificationResponse" class="mt-3" style="display: none;">
+                    <h5>Verification Response:</h5>
+                    <pre id="verificationResponseData" class="bg-light p-3 rounded"></pre>
+                </div>
+            </div>
         </div>
-
-        <a href="/" class="button back-button">Back to Home</a>
     </div>
 
     <script>
-        function generateRandomString(result) {
-            const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            for (let i = 0; i < 9; i++) {
-                result += characters.charAt(Math.floor(Math.random() * characters.length));
+        // Global functions for micro deposits
+        async function getMicroDeposits() {
+            const microDepositsResponse = document.getElementById('microDepositsResponse');
+            const microDepositsResponseData = document.getElementById('microDepositsResponseData');
+            const getMicroDepositsBtn = document.getElementById('getMicroDepositsBtn');
+            const verifyMicroDepositsBtn = document.getElementById('verifyMicroDepositsBtn');
+
+            try {
+                const bankRelationshipId = localStorage.getItem('bankRelationshipId');
+                const accountId = localStorage.getItem('createAccountResponse') ? 
+                    JSON.parse(localStorage.getItem('createAccountResponse')).data.account.accountId : null;
+                
+                console.log('Bank relationship ID:', bankRelationshipId);
+                console.log('Account ID:', accountId);
+                
+                if (!bankRelationshipId) {
+                    throw new Error('No bank relationship ID found. Please create a bank relationship first.');
+                }
+                
+                if (!accountId) {
+                    throw new Error('No account ID found. Please create an account first.');
+                }
+
+                // Show loader
+                const loaderOverlay = document.querySelector('.loader-overlay');
+                loaderOverlay.classList.add('active');
+                getMicroDepositsBtn.disabled = true;
+                microDepositsResponse.style.display = 'none';
+
+                console.log('Getting micro deposits for account ID:', accountId, 'and bank relationship ID:', bankRelationshipId);
+
+                const response = await fetch('/getMicroDepositAmounts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        accountId: accountId,
+                        bankRelationshipId: bankRelationshipId
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    microDepositsResponseData.textContent = JSON.stringify(result.data, null, 2);
+                    microDepositsResponse.style.display = 'block';
+                    verifyMicroDepositsBtn.disabled = false;
+                    
+                    // Store micro deposits data
+                    localStorage.setItem('microDepositsData', JSON.stringify(result.data));
+                    console.log('Micro deposits data stored:', result.data.microDepositAmounts);
+                } else {
+                    microDepositsResponseData.textContent = 'Error: ' + JSON.stringify(result.error, null, 2);
+                    microDepositsResponse.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error getting micro deposits:', error);
+                microDepositsResponseData.textContent = 'Error: ' + error.message;
+                microDepositsResponse.style.display = 'block';
+            } finally {
+                // Hide loader
+                const loaderOverlay = document.querySelector('.loader-overlay');
+                loaderOverlay.classList.remove('active');
+                getMicroDepositsBtn.disabled = false;
             }
-            populateRequestPayload(result);
         }
-        // On page load, manage accountId functionality
-        
 
-        // Function to populate request payload with accountId
-        function populateRequestPayload(accountId, accountNumber) {
-            fetch('../assets/data/createBankRelationship.json')
-                .then(res => {
-                    if (!res.ok) {
-                        throw new Error(`HTTP error! status: ${res.status}`);
-                    }
-                    return res.json();
-                })
-                .then(data => {
-                    // Inject account ID directly into the payload
-                    data.accountId = accountId;
-                    data.accountNumber = accountNumber
-                    document.getElementById('requestPayload').value = JSON.stringify(data, null, 2);
-                })
-                .catch(err => {
-                    console.error("Error loading payload:", err);
-                    document.getElementById('requestPayload').value = "Error loading payload: " + err.message;
+        async function verifyMicroDeposits() {
+            const verificationResponse = document.getElementById('verificationResponse');
+            const verificationResponseData = document.getElementById('verificationResponseData');
+            const verifyMicroDepositsBtn = document.getElementById('verifyMicroDepositsBtn');
+
+            try {
+                // Get all relevant data from localStorage
+                const bankRelationshipId = localStorage.getItem('bankRelationshipId');
+                const microDepositsData = localStorage.getItem('microDepositsData');
+                const accountResponse = localStorage.getItem('createAccountResponse');
+                const bankRelationshipDetails = localStorage.getItem('bankRelationshipDetails');
+                
+                console.log('=== VERIFY MICRO DEPOSITS DEBUG ===');
+                console.log('Bank Relationship ID:', bankRelationshipId);
+                console.log('Micro Deposits Data (raw):', microDepositsData);
+                console.log('Account Response:', accountResponse);
+                console.log('Bank Relationship Details:', bankRelationshipDetails);
+                
+                // Validate required data
+                if (!bankRelationshipId) {
+                    throw new Error('No bank relationship ID found. Please create a bank relationship first.');
+                }
+                
+                if (!microDepositsData) {
+                    throw new Error('No micro deposits data found. Please get micro deposits first.');
+                }
+
+                if (!accountResponse) {
+                    throw new Error('No account data found. Please create an account first.');
+                }
+
+                // Parse stored data
+                const accountData = JSON.parse(accountResponse);
+                const microDeposits = JSON.parse(microDepositsData);
+                const bankRelationship = bankRelationshipDetails ? JSON.parse(bankRelationshipDetails) : null;
+                
+                console.log('Account Data (parsed):', accountData);
+                console.log('Micro deposits data (parsed):', microDeposits);
+                console.log('Bank Relationship (parsed):', bankRelationship);
+
+                // Extract account information
+                const accountId = accountData?.data?.account?.accountId;
+                const accountName = accountData?.data?.account?.name;
+                
+                if (!accountId) {
+                    throw new Error('Could not extract account ID from stored data.');
+                }
+
+                // Extract the amount values from the micro deposits data
+                // Get directly from microDepositAmounts.amount1.value and microDepositAmounts.amount2.value
+                const amount1 = microDeposits?.microDepositAmounts?.amount1?.value;
+                const amount2 = microDeposits?.microDepositAmounts?.amount2?.value;
+                
+                if (!amount1 || !amount2) {
+                    console.error('Could not find amounts in expected structure:', microDeposits);
+                    throw new Error('Could not extract amount values from microDepositAmounts.amount1.value and microDepositAmounts.amount2.value. Please get micro deposits again.');
+                }
+
+                console.log('Extracted amounts from microDepositAmounts structure:');
+                console.log('- Amount1:', amount1);
+                console.log('- Amount2:', amount2);
+
+                // Extract bank relationship name if available
+                const bankRelationshipName = bankRelationship?.name || bankRelationshipId;
+
+                console.log('Final extracted data:');
+                console.log('- Account ID:', accountId);
+                console.log('- Account Name:', accountName);
+                console.log('- Bank Relationship ID:', bankRelationshipId);
+                console.log('- Bank Relationship Name:', bankRelationshipName);
+                console.log('- Amount1:', amount1);
+                console.log('- Amount2:', amount2);
+
+                // Show loader
+                const loaderOverlay = document.querySelector('.loader-overlay');
+                loaderOverlay.classList.add('active');
+                verifyMicroDepositsBtn.disabled = true;
+                verificationResponse.style.display = 'none';
+
+                // Prepare request body with all relevant information
+                const requestBody = {
+                    accountId: accountId,
+                    bankRelationshipId: bankRelationshipId,
+                    name: bankRelationshipName,
+                    amount1: amount1,
+                    amount2: amount2
+                };
+
+                console.log('Request body:', requestBody);
+
+                const response = await fetch('/verifyMicroDeposits', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody)
                 });
+
+                const result = await response.json();
+                console.log('Response from server:', result);
+
+                if (result.success) {
+                    verificationResponseData.textContent = JSON.stringify(result.data, null, 2);
+                    verificationResponse.style.display = 'block';
+                    
+                    // Store verification result
+                    localStorage.setItem('microDepositsVerification', JSON.stringify(result.data));
+                    console.log('Micro deposits verification stored:', result.data);
+                } else {
+                    verificationResponseData.textContent = 'Error: ' + JSON.stringify(result.error, null, 2);
+                    verificationResponse.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error verifying micro deposits:', error);
+                verificationResponseData.textContent = 'Error: ' + error.message;
+                verificationResponse.style.display = 'block';
+            } finally {
+                // Hide loader
+                const loaderOverlay = document.querySelector('.loader-overlay');
+                loaderOverlay.classList.remove('active');
+                verifyMicroDepositsBtn.disabled = false;
+            }
         }
 
-        // Function to create a bank relationship
-        function createBankRelationship() {
-            const responseArea = document.getElementById('responseData');
-            responseArea.value = 'Sending request...';
+        document.addEventListener('DOMContentLoaded', async () => {
+            const form = document.getElementById('bankRelationshipForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const reloadPayloadBtn = document.getElementById('reloadPayloadBtn');
+            const accountIdInput = document.getElementById('accountId');
+            const responseContainer = document.getElementById('responseContainer');
+            const responseArea = document.getElementById('responseArea');
+            const payloadTextArea = document.getElementById('requestPayload');
+            const payloadError = document.getElementById('payloadError');
+            const loaderOverlay = document.querySelector('.loader-overlay');
 
-            fetch('/createBankRelationship', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: document.getElementById('requestPayload').value
-            })
-                .then(res => {
-                    if (!res.ok) {
-                        throw new Error(`HTTP error! status: ${res.status}`);
+            // Function to show/hide loader
+            function toggleLoader(show) {
+                if (show) {
+                    loaderOverlay.classList.add('active');
+                    form.classList.add('loading');
+                } else {
+                    loaderOverlay.classList.remove('active');
+                    form.classList.remove('loading');
+                }
+            }
+
+            // Function to get account ID from storage
+            function getStoredAccountId() {
+                try {
+                    // First try localStorage
+                    const localData = localStorage.getItem('createAccountResponse');
+                    if (localData) {
+                        const parsedLocalData = JSON.parse(localData);
+                        if (parsedLocalData?.data?.account?.accountId) {
+                            console.log('Found account ID in localStorage', parsedLocalData.data.account.accountId);
+                            return parsedLocalData.data.account.accountId;
+                        }
                     }
-                    return res.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        responseArea.value = JSON.stringify(data.data, null, 2);
-                        localStorage.setItem("createBankRelationshipResponse", JSON.stringify(data));
+
+                } catch (error) {
+                    console.error('Error reading from storage:', error);
+                    return null;
+                }
+            }
+
+            // Function to extract bank relationship ID from the full path
+            function extractBankRelationshipId(name) {
+                if (!name) return null;
+                // Split by '/' and get the last part
+                const parts = name.split('/');
+                return parts[parts.length - 1];
+            }
+
+            // Function to save bank relationship details to localStorage
+            function saveBankRelationshipDetails(result) {
+                try {
+                    if (result?.data) {
+                        // Extract bank relationship ID from the name field
+                        const bankRelationshipId = extractBankRelationshipId(result.data.name);
+                        if (bankRelationshipId) {
+                            // Store just the ID in localStorage
+                            localStorage.setItem('bankRelationshipId', bankRelationshipId);
+                            console.log('Saved bank relationship ID to localStorage:', bankRelationshipId);
+                        }
+
+                        // Store complete bank relationship details
+                        const bankRelationshipDetails = {
+                            id: bankRelationshipId,
+                            name: result.data.name,
+                            status: result.data.status,
+                            verificationMethod: result.data.verificationMethod,
+                            verificationStatus: result.data.verificationStatus,
+                            bankAccount: result.data.bankAccount ? {
+                                name: result.data.bankAccount.name,
+                                accountNumber: result.data.bankAccount.accountNumber,
+                                routingNumber: result.data.bankAccount.routingNumber,
+                                accountType: result.data.bankAccount.accountType,
+                                bankName: result.data.bankAccount.bankName,
+                                ownerType: result.data.bankAccount.ownerType,
+                                ownership: result.data.bankAccount.ownership
+                            } : null,
+                            createdAt: result.data.createdAt,
+                            updatedAt: result.data.updatedAt
+                        };
+
+                        localStorage.setItem("bankRelationshipDetails", JSON.stringify(bankRelationshipDetails));
+                    }
+                } catch (error) {
+                    console.error('Error saving bank relationship details:', error);
+                }
+            }
+
+            // Try to get accountId from storage
+            const storedAccountId = getStoredAccountId();
+            if (storedAccountId) {
+                accountIdInput.value = storedAccountId;
+            }
+
+            // Function to handle successful bank relationship creation
+            function handleSuccessfulCreation(result) {
+                saveBankRelationshipDetails(result);
+                document.getElementById('bankActions').style.display = 'block';
+                document.getElementById('getMicroDepositsBtn').disabled = false;
+            }
+
+            // Form submission handler
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                toggleLoader(true);
+                responseContainer.style.display = 'none';
+
+                try {
+                    const accountId = accountIdInput.value.trim();
+                    if (!accountId) {
+                        throw new Error('Account ID is required');
+                    }
+
+                    console.log('Submitting bank relationship creation with account ID:', accountId);
+
+                    const response = await fetch('/createBankRelationship', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            accountId: accountId
+                        })
+                    });
+
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        responseArea.textContent = JSON.stringify(result.data, null, 2);
+                        saveBankRelationshipDetails(result);
+                        document.getElementById('bankActions').style.display = 'block';
                     } else {
-                        responseArea.value = 'Error: ' + JSON.stringify(data.error, null, 2);
+                        responseArea.textContent = 'Error: ' + JSON.stringify(result.error, null, 2);
                     }
-                })
-                .catch(err => {
-                    console.error('Error creating bank relationship:', err);
-                    responseArea.value = 'Error: ' + err.message;
-                });
-        }
+                    
+                    responseContainer.style.display = 'block';
+                } catch (error) {
+                    console.error('Error:', error);
+                    responseArea.textContent = 'Error: ' + error.message;
+                    responseContainer.style.display = 'block';
+                } finally {
+                    toggleLoader(false);
+                }
+            });
+
+            // Function to load payload
+            async function loadPayload() {
+                toggleLoader(true);
+                payloadTextArea.value = 'Loading...';
+                payloadError.style.display = 'none';
+                submitBtn.disabled = true;
+
+                try {
+                    const response = await fetch('/createBankRelationship/payload');
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch payload: ${response.status} ${response.statusText}`);
+                    }
+                    const payload = await response.json();
+                    if (!payload) {
+                        throw new Error('Received empty payload');
+                    }
+                    payloadTextArea.value = JSON.stringify(payload, null, 2);
+                    submitBtn.disabled = false;
+                } catch (error) {
+                    console.error('Error loading payload:', error);
+                    payloadTextArea.value = '';
+                    payloadError.textContent = `Error loading payload: ${error.message}`;
+                    payloadError.style.display = 'block';
+                    submitBtn.disabled = true;
+                } finally {
+                    toggleLoader(false);
+                }
+            }
+
+            // Initial payload load
+            loadPayload();
+
+            // Reload payload button handler
+            reloadPayloadBtn.addEventListener('click', loadPayload);
+        });
     </script>
 </body>
 

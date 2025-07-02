@@ -50,17 +50,60 @@ router.get("/payload", (req, res) => {
     }
 });
 router.post("/", async (_req, res) => {
+    var _a, _b, _c, _d;
     try {
         const payloadPath = path_1.default.join(__dirname, "../assets/data/createAccount.json");
         const payload = JSON.parse(fs_1.default.readFileSync(payloadPath, "utf-8"));
-        console.log("Creating legal natural person with payload:", JSON.stringify(payload, null, 2));
+        console.log("Creating account with payload:", JSON.stringify(payload, null, 2));
         const result = await ascend_1.default.accountCreation.createAccount(payload);
-        console.log("Account successful created:", JSON.stringify(result, null, 2));
-        res.json({ success: true, data: result });
+        console.log("Account successfully created:", JSON.stringify(result, null, 2));
+        const legalNaturalPersonId = (_d = (_c = (_b = (_a = result.account) === null || _a === void 0 ? void 0 : _a.parties) === null || _b === void 0 ? void 0 : _b[0]) === null || _c === void 0 ? void 0 : _c.legalNaturalPerson) === null || _d === void 0 ? void 0 : _d.legalNaturalPersonId;
+        res.json({
+            success: true,
+            data: {
+                ...result,
+                legalNaturalPersonId
+            }
+        });
     }
     catch (error) {
         console.error("Error creating account:", error);
         res.status(500).json({ success: false, error: error.message });
+    }
+});
+router.post("/getDetails", async (req, res) => {
+    var _a, _b, _c, _d, _e;
+    try {
+        const { accountId } = req.body;
+        if (!accountId) {
+            res.status(400).json({
+                success: false,
+                error: { message: "Account ID is required" }
+            });
+            return;
+        }
+        const formattedAccountId = accountId.startsWith('accounts/') ? accountId : `accounts/${accountId}`;
+        console.log("Getting details for account:", formattedAccountId);
+        const result = await ascend_1.default.accountCreation.getAccount(formattedAccountId);
+        const legalNaturalPersonId = (_d = (_c = (_b = (_a = result.account) === null || _a === void 0 ? void 0 : _a.parties) === null || _b === void 0 ? void 0 : _b[0]) === null || _c === void 0 ? void 0 : _c.legalNaturalPerson) === null || _d === void 0 ? void 0 : _d.legalNaturalPersonId;
+        console.log("Account details:", JSON.stringify(result, null, 2));
+        res.json({
+            success: true,
+            data: {
+                ...result,
+                legalNaturalPersonId
+            }
+        });
+    }
+    catch (error) {
+        console.error("Error retrieving account:", error);
+        res.status(500).json({
+            success: false,
+            error: {
+                message: error.message,
+                details: ((_e = error.response) === null || _e === void 0 ? void 0 : _e.data) || "No additional error details available"
+            }
+        });
     }
 });
 exports.default = router;
