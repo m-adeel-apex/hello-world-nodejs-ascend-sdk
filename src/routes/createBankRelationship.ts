@@ -1,16 +1,68 @@
 import { Router, Request, Response } from "express";
 import path from "path";
 import fs from "fs";
-//import { Apexascend } from "@apexfintechsolutions/ascend-sdk";
-//import { VerificationMethod } from "@apexfintechsolutions/ascend-sdk/models/components";
-import apexascend from "../utils/ascend";
 
+
+import apexascend from "../utils/ascend";
 
 const router = Router();
 // Define the path to the centralized JSON file
 const createBankRelationshipJSONPath = path.join(__dirname, "..", "assets", "data", "createBankRelationship.json");
+console.log("createBankRelationshipJSONPath", createBankRelationshipJSONPath);
 
-const updateBankAccountDetails = async () => {
+// Function to generate random number string with specified length
+const generateRandomNumberString = (length: number): string => {
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += Math.floor(Math.random() * 10).toString();
+    }
+    return result;
+};
+
+// Function to validate US routing number using checksum algorithm
+const isValidRoutingNumber = (routingNumber: string): boolean => {
+    if (routingNumber.length !== 9) return false;
+    
+    const weights = [3, 7, 1, 3, 7, 1, 3, 7, 1];
+    let sum = 0;
+    
+    for (let i = 0; i < 9; i++) {
+        sum += parseInt(routingNumber[i]) * weights[i];
+    }
+    
+    return sum % 10 === 0;
+};
+
+// Function to generate valid US routing number
+const generateRandomRoutingNumber = (): string => {
+    let routingNumber: string;
+    do {
+        // Generate first 8 digits randomly
+        const first8Digits = generateRandomNumberString(8);
+        // Calculate the 9th digit to make it valid
+        const weights = [3, 7, 1, 3, 7, 1, 3, 7];
+        let sum = 0;
+        
+        for (let i = 0; i < 8; i++) {
+            sum += parseInt(first8Digits[i]) * weights[i];
+        }
+        
+        // Calculate the check digit (9th digit)
+        const checkDigit = (10 - (sum % 10)) % 10;
+        routingNumber = first8Digits + checkDigit.toString();
+        
+    } while (!isValidRoutingNumber(routingNumber));
+    
+    return routingNumber;
+};
+
+// Function to generate random account number (10 digits)
+const generateRandomAccountNumber = (): string => {
+    return generateRandomNumberString(10);
+};
+
+// Function to load and update the payload with random numbers
+const loadBankRelationshipPayload = async () => {
     try {
         // Check if the JSON file exists
         if (!fs.existsSync(createBankRelationshipJSONPath)) {
@@ -20,120 +72,100 @@ const updateBankAccountDetails = async () => {
         // Read the JSON file
         const jsonString = fs.readFileSync(createBankRelationshipJSONPath, "utf8");
         const bankRelationshipPayload = JSON.parse(jsonString);
-
-        // Generate random values for routingNumber and accountNumber
-        const routingNumber = generateRandomNumberString(9); // Routing number as 9 digits
-        const accountNumber = generateRandomNumberString(10); // Account number as 10 digits
-
-        // Update the bankAccount object
-        bankRelationshipPayload.bankAccount.routingNumber = routingNumber;
-        bankRelationshipPayload.bankAccount.accountNumber = accountNumber;
-
-        // Save the updated JSON back to the file
-        fs.writeFileSync(createBankRelationshipJSONPath, JSON.stringify(bankRelationshipPayload, null, 2));
-        console.log("Updated JSON successfully saved:", createBankRelationshipJSONPath);
-
-        return bankRelationshipPayload; // Return the updated JSON object
+        
+        // Generate random routing and account numbers
+        //const randomRoutingNumber = generateRandomRoutingNumber();
+      //  const routingNumber = generateRandomRoutingNumber();
+       const randomAccountNumber = generateRandomAccountNumber();
+        
+        // Update the payload with random numbers
+        //bankRelationshipPayload.bankAccount.routingNumber = randomRoutingNumber;
+        bankRelationshipPayload.bankAccount.accountNumber = randomAccountNumber;
+        //bankRelationshipPayload.bankAccount.routingNumber = routingNumber;
+        
+        //console.log("Generated random routing number:", randomRoutingNumber);
+        //console.log("Generated random account number:", randomAccountNumber);
+        console.log("Updated bank relationship payload:", JSON.stringify(bankRelationshipPayload, null, 2));
+        
+        return bankRelationshipPayload;
     } catch (error) {
-        console.error("Error updating bank account details:", error);
+        console.error("Error loading bank relationship payload:", error);
         throw error;
     }
 };
-/**
-* Helper function to generate random numeric strings of a given length
-*/
-const generateRandomNumberString = (length: number): string => {
-    let result = "";
-    const digits = "0123456789";
-    for (let i = 0; i < length; i++) {
-        result += digits.charAt(Math.floor(Math.random() * digits.length));
-    }
-    return result;
-};
 
-// Replace values and log the result
-const getBankRelationshipJSONPath = path.join(__dirname, "..", "assets", "data", "createBankRelationship.json");
-console.log('JSON Payload Path:', getBankRelationshipJSONPath);
-
-const createBankRelationshipPayload = (): any => {
-    try {
-        console.log('Checking file exists at:', getBankRelationshipJSONPath);
-        if (!fs.existsSync(getBankRelationshipJSONPath)) {
-            console.error(`File not found: ${getBankRelationshipJSONPath}`);
-            throw new Error("Payload file not found");
-        }
-        console.log('Reading file...');
-        const payload = JSON.parse(fs.readFileSync(getBankRelationshipJSONPath, "utf8"));
-        console.log('Successfully parsed payload');
-        return payload;
-    } catch (error) {
-        console.error("Error reading create Account payload:", error);
-        throw error;
-    }
-};
 // Serve the payload
-router.get("/payload", (req: Request, res: Response) => {
-    console.log('GET /payload - Attempting to serve payload');
+router.get("/payload", async (req: Request, res: Response) => {
+    console.log('GET /createBankRelationship/payload - Attempting to serve payload');
     try {
-        console.log("Reading payload from:", getBankRelationshipJSONPath);
-        const payload = createBankRelationshipPayload();
-        console.log('Successfully read payload, sending response');
-        res.type('application/json').send(JSON.stringify(payload));
+        const payload = await loadBankRelationshipPayload();
+        console.log('Successfully loaded payload:', JSON.stringify(payload, null, 2));
+        
+        // Set proper headers
+        res.setHeader('Content-Type', 'application/json');
+        res.json(payload);
     } catch (error: any) {
         console.error('Error serving payload:', error);
-        res.status(500).type('application/json').send(JSON.stringify({
+        res.status(500).json({
             success: false,
             error: {
                 message: error.message
             }
-        }));
+        });
     }
-});
-
-updateBankAccountDetails()
-.then((updatedPayload) => {
-    console.log("Updated Payload:", JSON.stringify(updatedPayload, null, 2));
-})
-.catch((err) => {
-    console.error("Failed to update bank account details:", err);
 });
 
 router.get("/", (req: Request, res: Response) => {
-console.log('GET / - Rendering Create Bank Relationship template');
-res.render('createBankRelationship');
+    console.log('GET /createBankRelationship - Rendering Create Bank Relationship template');
+    res.render('createBankRelationship');
 });
 
-router.post("/", async (_req: Request, res: Response) => {
+router.post("/", async (req: Request, res: Response) => {
     try {
-        let accountId = "";
-        const storedCreateAccount = localStorage.getItem("createAccountResponse");
-
-        if (storedCreateAccount) {
-            const parsedAccount = JSON.parse(storedCreateAccount);
-            if (parsedAccount && parsedAccount.data && parsedAccount.data.account && parsedAccount.data.account.accountId) {
-                accountId = parsedAccount.data.account.accountId; // Use stored accountId
-            } else {
-                console.log("Invalid format in localStorage, generating random Account ID...");
-                accountId = "01H8FB90ZRRFWXB4XC2JPJ1D4Y"; // Example random accountId
-            }
-        } else {
-            console.log("No Account ID found in localStorage, generating random Account ID...");
-            accountId = "01H8FB90ZRRFWXB4XC2JPJ1D4Y"; // Example random accountId
+        // Get accountId from request body or query parameters
+        const accountId = req.body.accountId || req.query.accountId;
+        
+        if (!accountId) {
+            throw new Error("Account ID is required");
         }
 
         console.log("Using Account ID:", accountId);
-      const updatedPayload = await updateBankAccountDetails();
-      console.log("Updated createBankRelationship payload:", JSON.stringify(updatedPayload, null, 2));
-  
-      const result = await apexascend.bankRelationships.createBankRelationship(updatedPayload, accountId);
-      console.log("Bank Relationship successfully created:", JSON.stringify(result, null, 2));
-  
-      res.json({ success: true, data: result });
-    } catch (error) {
-      console.error("Error creating Bank Relationship:", error);
-      res.status(500).json({ success: false, error: error.message });
+        
+        try {
+            // Load the payload from JSON file
+            const payload = await loadBankRelationshipPayload();
+            console.log("Using payload for bank relationship creation:", JSON.stringify(payload, null, 2));
+
+            const result = await apexascend.bankRelationships.createBankRelationship(payload, accountId);
+
+            const bankRelationship = result.bankRelationship;
+            console.log("Bank Relationship successfully created:", JSON.stringify(bankRelationship, null, 2));
+
+            res.json({ 
+                success: true, 
+                data: bankRelationship
+            });
+        } catch (apiError: any) {
+            console.error("API Error creating Bank Relationship:", apiError);
+            res.status(500).json({ 
+                success: false, 
+                error: {
+                    message: apiError.message || "Failed to create bank relationship",
+                    details: apiError.response?.data || null
+                }
+            });
+        }
+    } catch (error: any) {
+        console.error("Error creating Bank Relationship:", error);
+        res.status(500).json({ 
+            success: false, 
+            error: {
+                message: error.message,
+                details: error.details || null
+            }
+        });
     }
-  });
+});
 
 export default router;
 

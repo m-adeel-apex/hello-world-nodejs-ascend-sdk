@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Legal Natural Person Mobile</title>
+    <link rel="stylesheet" href="/assets/styles/main.css">
+    <link rel="stylesheet" href="/assets/styles/iphone.css">
+    <link rel="stylesheet" href="/assets/styles/mobileApp.css">
+    <link rel="stylesheet" href="/assets/styles/loader.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="page-container">
+        <!-- iPhone Section -->
+        <div class="iphone-section">
+            <div class="iphone-frame">
+                <div class="iphone-screen">
+                    <div class="status-bar">
+                        <span>9:41</span>
+                        <span>Legal Natural Person</span>
+                        <span>100%</span>
+                    </div>
+                    
+                    <div class="app-content">
+                        <div class="header">
+                            <h1>Create Legal Natural Person</h1>
+                        </div>
+
+                        <div class="form-container">
+                            <button class="btn btn-primary" id="createBtn" onclick="createLegalNaturalPerson()">
+                                Create Legal Natural Person
+                            </button>
+
+                            <div class="loading" id="loading">
+                                <div class="spinner"></div>
+                                <div>Creating Legal Natural Person...</div>
+                            </div>
+
+                            <!-- Success Display Section -->
+                            <div class="success-display" id="successDisplay" style="display: none;">
+                                <div class="card">
+                                    <div class="card-header text-center">
+                                        <h6 style="margin: 0; color: #28a745;">✅ Created Successfully!</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-group">
+                                            <label class="form-label">First Name:</label>
+                                            <div class="form-label" id="displayFirstName"></div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="form-label">Last Name:</label>
+                                            <div class="form-label" id="displayLastName"></div>
+                                        </div>
+                                        <div class="d-flex gap-2 mt-15">
+                                            <button class="btn btn-primary" onclick="goToCreateAccount()" style="flex: 1;">
+                                                Create Account →
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="/" class="back-button">← Back</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Debug Section -->
+        <div class="debug-section">
+            <h3>Request & Response Debug</h3>
+            
+            <div class="form-group">
+                <div class="request-header" id="responseHeader">Request Payload</div>
+                <textarea id="requestPayload" readonly class="request-content" rows="8"></textarea>
+            </div>
+
+            <div class="response-container" id="responseContainer">
+                <div class="response-header" id="responseHeader">Response</div>
+                <div class="response-content" id="responseContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fetch and display the payload when page loads
+        fetch('/legalNaturalPersonMobile/payload')
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(data => {
+                document.getElementById('requestPayload').value = JSON.stringify(data, null, 2);
+            })
+            .catch(err => {
+                console.error('Error loading payload:', err);
+                document.getElementById('requestPayload').value = 'Error loading payload: ' + err.message;
+            });
+
+        async function createLegalNaturalPerson() {
+            const createBtn = document.getElementById('createBtn');
+            const loading = document.getElementById('loading');
+            const responseContainer = document.getElementById('responseContainer');
+            const responseHeader = document.getElementById('responseHeader');
+            const responseContent = document.getElementById('responseContent');
+            const successDisplay = document.getElementById('successDisplay');
+
+            // Show loading, hide form and success display
+            createBtn.disabled = true;
+            loading.style.display = 'block';
+            successDisplay.style.display = 'none';
+            responseContainer.style.display = 'none';
+
+            try {
+                const response = await fetch('/legalNaturalPersonMobile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+
+                // Hide loading
+                loading.style.display = 'none';
+
+                if (result.success) {
+                    // Extract First Name and Last Name from the response
+                    const firstName = result.data?.legalNaturalPerson?.givenName || 
+                                    result.data?.firstName || 
+                                    'N/A';
+                    console.log("FirstName: ", firstName);
+                    const lastName = result.data?.legalNaturalPerson?.familyName || 
+                                   result.data?.lastName || 
+                                   'N/A';
+                    console.log("LastName: ", lastName);
+                    
+                    // Hide create button and show success display
+                    createBtn.style.display = 'none';
+                    
+                    // Show success display with created names
+                    successDisplay.style.display = 'block';
+                    document.getElementById('displayFirstName').textContent = firstName;
+                    document.getElementById('displayLastName').textContent = lastName;
+                    
+                    // Show response in debug panel
+                    responseContainer.style.display = 'block';
+                    responseHeader.textContent = '✅ Success';
+                    responseHeader.className = 'response-header success';
+                    responseContent.textContent = JSON.stringify(result.data, null, 2);
+                    localStorage.setItem('legalNaturalPersonResponse', JSON.stringify(result));
+                } else {
+                    // Show error in debug panel
+                    responseContainer.style.display = 'block';
+                    responseHeader.textContent = '❌ Error';
+                    responseHeader.className = 'response-header error';
+                    responseContent.textContent = JSON.stringify(result.error, null, 2);
+                }
+            } catch (error) {
+                console.error('Error creating legal natural person:', error);
+                
+                // Hide loading, show error
+                loading.style.display = 'none';
+                responseContainer.style.display = 'block';
+                responseHeader.textContent = '❌ Error';
+                responseHeader.className = 'response-header error';
+                responseContent.textContent = 'Error: ' + error.message;
+            } finally {
+                createBtn.disabled = false;
+            }
+        }
+
+        function resetForm() {
+            // Show create button again
+            document.getElementById('createBtn').style.display = 'block';
+            
+            // Hide success display
+            document.getElementById('successDisplay').style.display = 'none';
+            
+            // Hide response container
+            document.getElementById('responseContainer').style.display = 'none';
+        }
+
+        function goToCreateAccount() {
+            // Redirect to the Create Account Mobile page
+            window.location.href = '/createAccountMobile';
+        }
+    </script>
+</body>
+</html> 

@@ -2,6 +2,7 @@
         "defaultAccount": {
                 "id": "01J2F7HVP81GWMHJS78N56CAEZ",
                 "name": "AdeelInternalTest",
+                "baseURL": "https://uat.apexapis.com/",
                 "status": "active",
                 "content-Type": "application/json",
                 "JWS": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE3NDc3NTk4ODEsIm5iZiI6MTc0Nzc1OTg4MSwiZXhwIjoxNzQ3NzYwNDg2LCJqdGkiOiJPYkNJUzFjZjJ1UGlwRURYS0UwelkiLCJuYW1lIjoiQWRlZWxJbnRlcm5hbFRlc3QiLCJvcmdhbml6YXRpb24iOiJmaXJtcy9BRlMiLCJkYXRldGltZSI6IjIwMjUtMDUtMjBUMTY6NTE6MjUuMTg2WiJ9.ig8W5Q8SvCvt98CzuABMCv5eXzaikq9iidsQNkRuMqeFA34uV2_G8EC8P9e6i9IvJLqs_oFcYfknsf_vluJYeHvZ0O4RfZfb4qQkJGPobpEpwmiD2sYWunn_3XZhD2JsvDtrIasLyFtLRklKa-BS82B9C04jdVLTvlEPqOA2EWYgHIyx1i54b0GmJOjhnz_CY86s9l1LKYr4FT-TuISIkIXXlIDyHhOr2UYxQdneDPjsctxaDaJZ1xfYBhzxBYZGsGgaZ_8TVNTFtcGHjt3BqfklZ9NMwm686XpnKuj4JQgHXnRJesGXIO3WVklAgNNO3Qasmr8YNLmXGXHdnezsaA",
@@ -10,7 +11,13 @@
                 "organization": "firms/AFS",
                 "account": "serviceAccount",
                 "correspondentId": "00000000-0000-0000-0000-000000000001",
-                "apiKey": "MQmC5WVluilZt2z0mBzDLWwGJyoNkGZJfjDAr1hlig5dNiAy"
+                "apiKey": "MQmC5WVluilZt2z0mBzDLWwGJyoNkGZJfjDAr1hlig5dNiAy",
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+        },
+        "headers": {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
         }
 }
 

@@ -1,56 +1,63 @@
 {
-    "citizenship_countries": [
-        "US"
+  "correspondentId": "00000000-0000-0000-0000-000000000001",
+  "birthDate": {
+    "year": 1999,
+    "month": 5,
+    "day": 1
+  },
+  "familyName": "Doe",
+  "givenName": "John",
+  "citizenshipCountries": [
+    "US"
+  ],
+  "locality": "NYC",
+  "personalAddress": {
+    "revision": 0,
+    "regionCode": "US",
+    "postalCode": "76537",
+    "locality": "US",
+    "addressLines": [
+      "156 Bricky"
     ],
-    "correspondent_id": "00000000-0000-0000-0000-000000000001",
-    "birth_date": {
-        "day": 1,
-        "month": 5,
-        "year": 1999
+    "administrativeArea": "TX"
+  },
+  "employment": {
+    "employer": "Apex Fintech Solutions",
+    "occupation": "Software Engineer",
+    "employmentStatus": "EMPLOYED"
+  },
+  "investment_profile": {
+    "account_goals": {
+      "investment_objective": "OTHER"
     },
-    "employment": {
-        "employment_status": "UNEMPLOYED" 
-        
-    },
-    "family_name": "Legit",
-    "given_name": "Stevie",
-   
-    "personal_address": {
-       
-        "region_code": "US",
-       
-        "postal_code": "10010",
-      
-        "administrative_area": "NY",
-        "locality": "NYC",
-     
-        "address_lines": [
-            "fake street 12345",
-            "123 Fake St"
-        ] 
-    },
-    "identity_verification_result": {
-        "vendor": "Adeel, Osinski and Corkery",
-        "external_case_id": "12345-7894",
-        "execution_date": {
-            "year": 2022,
-            "month": 4,
-            "day": 7
-        },
-        "name_verified": true,
-        "address_verified": true,
-        "tax_id_verified": true,
-        "birth_date_verified": true,
-        "raw_vendor_data_document_id": "Test",
-        "identity_verification_document_ids": [
-            "Test"
-        ]
-    },
-    "tax_id": "667-55-4837",
-    "tax_id_type": "TAX_ID_TYPE_SSN",
-    "tax_profile": {
-        "federal_tax_classification": "INDIV_SOLEPROP_OR_SINGLEMEMBERLLC",
-        "irs_form_type": "W_9",
-        "us_tin_status": "PASSING"
+    "customer_profile": {
+      "annual_income_range_usd": "FROM_300K_TO_500K",
+      "total_net_worth_range_usd": "UNDER_25K"
     }
+  },
+  "identityVerificationResult": {
+    "addressVerified": true,
+    "birthDateVerified": true,
+    "executionDate": {
+      "year": 2022,
+      "month": 4,
+      "day": 7
+    },
+    "externalCaseId": "12345-7894",
+    "nameVerified": true,
+    "taxIdVerified": true,
+    "vendor": "Adeel, Osinski and Corkery",
+    "rawVendorDataDocumentId": "9488bc2d-f1a3-46a3-b31c-3a4100b58597"
+  },
+  "taxId": "987-65-4321",
+  "taxIdType": "TAX_ID_TYPE_SSN",
+  "taxIdLastFour": "4321",
+  "taxProfile": {
+    "irsFormType": "W_9",
+    "legalTaxRegionCode": "US",
+    "reportingEligibility": "ELIGIBLE",
+    "taxpayerCertificationState": "CERTIFIED",
+    "usTinStatus": "PASSING",
+    "federalTaxClassification": "INDIV_SOLEPROP_OR_SINGLEMEMBERLLC"
+  }
 }

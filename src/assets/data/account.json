@@ -11,7 +11,13 @@
                 "organization": "firms/AFS",
                 "account": "serviceAccount",
                 "correspondentId": "00000000-0000-0000-0000-000000000001",
-                "apiKey": "MQmC5WVluilZt2z0mBzDLWwGJyoNkGZJfjDAr1hlig5dNiAy"
+                "apiKey": "MQmC5WVluilZt2z0mBzDLWwGJyoNkGZJfjDAr1hlig5dNiAy",
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+        },
+        "headers": {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
         }
 }
 

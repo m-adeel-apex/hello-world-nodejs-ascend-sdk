@@ -6,21 +6,19 @@
 </head>
 <body>
     <div class="container">
-        <h2>Legal Natural Person</h2>
-        
+        <div class="header">
+            <h1>Legal Natural Person</h1>
+            <a href="/" class="btn btn-secondary">Back to Home</a>
+        </div>
         <div class="section">
             <h3>Request Payload</h3>
             <textarea id="requestPayload" readonly class="textarea"></textarea>
         </div>
-
-        <button class="button primary-button" onclick="createLegalNaturalPerson()">Create Legal Natural Person</button>
-        
+        <button class="btn btn-primary" onclick="createLegalNaturalPerson()">Create Legal Natural Person</button>
         <div class="section">
             <h3>Response</h3>
             <textarea id="responseData" readonly class="textarea"></textarea>
         </div>
-
-        <a href="/" class="button back-button">Back to Home</a>
     </div>
 
     <script>
@@ -60,6 +58,7 @@
             .then(data => {
                 if (data.success) {
                     responseArea.value = JSON.stringify(data.data, null, 2);
+                    localStorage.setItem("legalNaturalPersonResponse", JSON.stringify(data));
                 } else {
                     responseArea.value = 'Error: ' + JSON.stringify(data.error, null, 2);
                 }

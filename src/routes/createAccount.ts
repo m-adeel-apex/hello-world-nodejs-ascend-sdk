@@ -19,6 +19,7 @@ const createAccountPayload = (): any => {
     console.log('Reading file...');
     const payload = JSON.parse(fs.readFileSync(getAccountJSONPath, "utf8"));
     console.log('Successfully parsed payload');
+    console.log("Legal Natural Person ID: Coning from Typescript File", payload.parties[0].legalNaturalPersonId);
     return payload;
   } catch (error) {
     console.error("Error reading create Account payload:", error);
@@ -50,43 +51,60 @@ router.get("/payload", (req: Request, res: Response) => {
   }
 });
 
-router.post("/", async (_req: Request, res: Response) => {
+router.post("/", async (req: Request, res: Response) => {
   try {
-    const payloadPath = path.join(__dirname, "../assets/data/createAccount.json");
-    const payload = JSON.parse(fs.readFileSync(payloadPath, "utf-8"));
-
-    console.log("Creating legal natural person with payload:", JSON.stringify(payload, null, 2));
+    // Get the payload from the request body
+    const payload = req.body;
+    console.log("Payload: ", payload);
     
-    //const apexascend = new Apexascend();
+    if (!payload) {
+      throw new Error("No payload provided in request body");
+    }
+
+    console.log("Creating account with payload:", JSON.stringify(payload, null, 2));
+    
     const result = await apexascend.accountCreation.createAccount(payload);
-    console.log("Account successful created:", JSON.stringify(result, null, 2));
-    res.json({ success: true, data: result });
+    console.log("Account successfully created:", JSON.stringify(result, null, 2));
+
+    res.json({ 
+      success: true, 
+      data: result
+    });
   } catch (error) {
     console.error("Error creating account:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
 
-export default router;
-
-// Serve the Get Account page
-/* router.get("/", (req: Request, res: Response) => {
-  res.render('getAccount');
-});
-
-// Handle GET request to fetch account details
-router.get("/getDetails", async (req: Request, res: Response) => {
+router.post("/getDetails", async (req: Request, res: Response) => {
   try {
-    const accountId = req.query.accountId as string;
-  if (!accountId) {
+    const { accountId } = req.body;
+    
+    if (!accountId) {
       res.status(400).json({ 
         success: false, 
         error: { message: "Account ID is required" }
       });
-    return;
-  }
-    const result = await apexascend.accountCreation.getAccount(accountId);
-    res.json({ success: true, data: result });
+      return;
+    }
+
+    // Format account ID if needed
+    const formattedAccountId = accountId.startsWith('accounts/') ? accountId : `accounts/${accountId}`;
+    console.log("Getting details for account:", formattedAccountId);
+
+    const result = await apexascend.accountCreation.getAccount(formattedAccountId);
+    
+    // Extract the legalNaturalPersonId from the account details
+    const legalNaturalPersonId = result.account?.parties?.[0]?.legalNaturalPerson?.legalNaturalPersonId;
+    
+    console.log("Account details:", JSON.stringify(result, null, 2));
+    res.json({ 
+      success: true, 
+      data: {
+        ...result,
+        legalNaturalPersonId // Include the legalNaturalPersonId in the response
+      }
+    });
   } catch (error: any) {
     console.error("Error retrieving account:", error);
     res.status(500).json({ 
@@ -99,4 +117,4 @@ router.get("/getDetails", async (req: Request, res: Response) => {
   }
 });
 
-export default router; */
+export default router;

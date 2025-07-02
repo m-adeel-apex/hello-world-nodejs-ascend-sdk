@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bank Relationship SDK Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/styles/main.css">
+    <style>
+        :root {
+            --ios-background: #f2f2f7;
+            --ios-card: #ffffff;
+            --ios-primary: #007aff;
+            --ios-success: #34c759;
+            --ios-danger: #ff3b30;
+            --ios-gray: #8e8e93;
+        }
+
+        body {
+            background-color: var(--ios-background);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+            max-width: 414px; /* iPhone Plus width */
+            margin: 0 auto;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        .ios-header {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .ios-card {
+            background: var(--ios-card);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 1rem;
+            margin: 1rem;
+        }
+
+        .ios-button {
+            background: var(--ios-primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 0.8rem;
+            width: 100%;
+            font-weight: 600;
+            margin: 0.5rem 0;
+            transition: opacity 0.2s;
+        }
+
+        .ios-button:disabled {
+            opacity: 0.6;
+        }
+
+        .ios-button.success {
+            background: var(--ios-success);
+        }
+
+        .ios-input {
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 8px;
+            padding: 0.8rem;
+            width: 100%;
+            margin: 0.5rem 0;
+            font-size: 1rem;
+        }
+
+        .ios-label {
+            font-size: 0.9rem;
+            color: var(--ios-gray);
+            margin-bottom: 0.3rem;
+        }
+
+        .ios-status {
+            padding: 0.4rem 0.8rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            display: inline-block;
+        }
+
+        .ios-status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .ios-status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .ios-status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .loader {
+            width: 100%;
+            height: 2px;
+            background: var(--ios-primary);
+            position: absolute;
+            top: 0;
+            left: 0;
+            animation: loading 2s infinite;
+            display: none;
+        }
+
+        @keyframes loading {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .loading .loader {
+            display: block;
+        }
+
+        .response-box {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-top: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body class="bank-sdk">
+    <div class="loader"></div>
+
+    <div class="ios-header">
+        <h1 style="font-size: 1.5rem; margin: 0;">Bank Relationship SDK</h1>
+    </div>
+
+    <div class="ios-card">
+        <div class="ios-label">Account ID</div>
+        <input type="text" id="accountId" class="ios-input" placeholder="Enter Account ID">
+        
+        <div class="ios-label">Bank Details</div>
+        <input type="text" id="bankName" class="ios-input" placeholder="Bank Name" value="My Primary Bank">
+        
+        <button id="createBankBtn" class="ios-button">Create Bank Relationship</button>
+    </div>
+
+    <div id="bankActions" class="ios-card" style="display: none;">
+        <div class="ios-label">Verification Status</div>
+        <div class="ios-status pending" id="verificationStatus">Pending Verification</div>
+        
+        <div style="margin-top: 1rem;">
+            <button id="getMicroDepositsBtn" class="ios-button">
+                Get Micro Deposits
+            </button>
+            <button id="verifyMicroDepositsBtn" class="ios-button success" disabled>
+                Verify Micro Deposits
+            </button>
+        </div>
+
+        <div id="microDepositsResponse" class="response-box" style="display: none;"></div>
+        <div id="verificationResponse" class="response-box" style="display: none;"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const accountIdInput = document.getElementById('accountId');
+            const bankNameInput = document.getElementById('bankName');
+            const createBankBtn = document.getElementById('createBankBtn');
+            const bankActions = document.getElementById('bankActions');
+            const getMicroDepositsBtn = document.getElementById('getMicroDepositsBtn');
+            const verifyMicroDepositsBtn = document.getElementById('verifyMicroDepositsBtn');
+            const microDepositsResponse = document.getElementById('microDepositsResponse');
+            const verificationResponse = document.getElementById('verificationResponse');
+            const verificationStatus = document.getElementById('verificationStatus');
+
+            function toggleLoading(show) {
+                document.body.classList.toggle('loading', show);
+            }
+
+            function updateStatus(status, type = 'pending') {
+                verificationStatus.textContent = status;
+                verificationStatus.className = `ios-status ${type}`;
+            }
+
+            // Load stored account ID if available
+            const storedAccountId = localStorage.getItem('createAccountResponse');
+            if (storedAccountId) {
+                try {
+                    const parsedData = JSON.parse(storedAccountId);
+                    if (parsedData?.data?.account?.accountId) {
+                        accountIdInput.value = parsedData.data.account.accountId;
+                    }
+                } catch (error) {
+                    console.error('Error loading stored account ID:', error);
+                }
+            }
+
+            async function createBankRelationship() {
+                const accountId = accountIdInput.value.trim();
+                const bankName = bankNameInput.value.trim();
+
+                if (!accountId) {
+                    alert('Please enter an Account ID');
+                    return;
+                }
+
+                toggleLoading(true);
+                try {
+                    const response = await fetch('/bank-sdk/create', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            accountId,
+                            nickname: bankName
+                        })
+                    });
+
+                    const result = await response.json();
+                    
+                    if (response.ok && result.success) {
+                        bankActions.style.display = 'block';
+                        localStorage.setItem('bankRelationshipId', result.data.id);
+                        updateStatus('Ready for Verification');
+                    } else {
+                        updateStatus('Creation Failed', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    updateStatus('Error: ' + error.message, 'error');
+                } finally {
+                    toggleLoading(false);
+                }
+            }
+
+            async function getMicroDeposits() {
+                const bankRelationshipId = localStorage.getItem('bankRelationshipId');
+                const accountId = accountIdInput.value.trim();
+
+                if (!bankRelationshipId || !accountId) {
+                    alert('Missing required information');
+                    return;
+                }
+
+                toggleLoading(true);
+                try {
+                    const response = await fetch('/bank-sdk/micro-deposits', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ accountId, bankRelationshipId })
+                    });
+
+                    const result = await response.json();
+                    microDepositsResponse.style.display = 'block';
+                    microDepositsResponse.textContent = JSON.stringify(result, null, 2);
+
+                    if (response.ok && result.success) {
+                        localStorage.setItem('microDepositsResponse', JSON.stringify(result));
+                        verifyMicroDepositsBtn.disabled = false;
+                        updateStatus('Deposits Sent', 'success');
+                    } else {
+                        updateStatus('Failed to Get Deposits', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    updateStatus('Error: ' + error.message, 'error');
+                } finally {
+                    toggleLoading(false);
+                }
+            }
+
+            async function verifyMicroDeposits() {
+                const bankRelationshipId = localStorage.getItem('bankRelationshipId');
+                const accountId = accountIdInput.value.trim();
+
+                if (!bankRelationshipId || !accountId) {
+                    alert('Missing required information');
+                    return;
+                }
+
+                toggleLoading(true);
+                try {
+                    const response = await fetch('/bank-sdk/verify', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            bankRelationshipId,
+                            accountId,
+                            amounts: [32, 45] // This should come from user input
+                        })
+                    });
+
+                    const result = await response.json();
+                    verificationResponse.style.display = 'block';
+                    verificationResponse.textContent = JSON.stringify(result, null, 2);
+
+                    if (response.ok && result.success) {
+                        updateStatus('Verified Successfully', 'success');
+                    } else {
+                        updateStatus('Verification Failed', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    updateStatus('Error: ' + error.message, 'error');
+                } finally {
+                    toggleLoading(false);
+                }
+            }
+
+            createBankBtn.addEventListener('click', createBankRelationship);
+            getMicroDepositsBtn.addEventListener('click', getMicroDeposits);
+            verifyMicroDepositsBtn.addEventListener('click', verifyMicroDeposits);
+        });
+    </script>
+</body>
+</html> 

@@ -8,17 +8,17 @@
 
 <body>
   <div class="container">
-    <h2>Get Account Information</h2>
+    <div class="header">
+      <h1>Get Account</h1>
+      <a href="/" class="btn btn-secondary">Back to Home</a>
+    </div>
     <form id="getAccountForm">
       <label for="accountNumber">Account Number:</label>
       <input type="text" id="accountNumber" name="accountNumber" required />
-      <button type="submit" class="button primary-button">Fetch Account Information</button>
+      <button type="submit" class="btn btn-primary">Fetch Account Information</button>
     </form>
-
     <textarea id="accountDetails" readonly class="textarea"></textarea>
-    <a href="/" class="button back-button">Back to Home</a>
   </div>
-
   <script>
     document.getElementById("getAccountForm").addEventListener("submit", async (event) => {
       event.preventDefault(); // Prevent form submission refresh
@@ -38,5 +38,4 @@
     });
   </script>
 </body>
-
 </html>

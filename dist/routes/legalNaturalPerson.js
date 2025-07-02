@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
-const ascend_sdk_1 = require("@apexfintechsolutions/ascend-sdk");
+const ascend_1 = __importDefault(require("../utils/ascend"));
 const router = (0, express_1.Router)();
 const legalNaturalPersonJSONPath = path_1.default.join(__dirname, "..", "assets", "data", "createLegalNaturalPerson.json");
 console.log('JSON Payload Path:', legalNaturalPersonJSONPath);
@@ -54,8 +54,7 @@ router.post("/", async (_req, res) => {
         const payloadPath = path_1.default.join(__dirname, "../assets/data/createLegalNaturalPerson.json");
         const payload = JSON.parse(fs_1.default.readFileSync(payloadPath, "utf-8"));
         console.log("Creating legal natural person with payload:", JSON.stringify(payload, null, 2));
-        const apexascend = new ascend_sdk_1.Apexascend();
-        const result = await apexascend.personManagement.createLegalNaturalPerson(payload);
+        const result = await ascend_1.default.personManagement.createLegalNaturalPerson(payload);
         console.log("Legal natural person creation successful:", JSON.stringify(result, null, 2));
         res.json({ success: true, data: result });
     }
